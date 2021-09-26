@@ -25,8 +25,7 @@ func NewServer(port int) *Server {
 
 // Start starts the port listening
 func (s *Server) Start() error {
-	fs := http.FileServer(http.Dir("static"))
-	s.router.Handle("/static/", http.StripPrefix("/static/", fs))
+	s.router.Handle("/", http.FileServer(http.Dir("static")))
 
 	return http.ListenAndServe(
 		fmt.Sprintf(":%d", s.port),
