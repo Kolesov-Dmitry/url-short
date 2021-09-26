@@ -1,8 +1,11 @@
 package app
 
+import "url-short/internal/srv"
+
 // Application manages url-short application control flow and main settings
 type Application struct {
 	settings *settings
+	server   *srv.Server
 }
 
 // NewApplication creates new Application instance
@@ -10,6 +13,7 @@ type Application struct {
 func NewApplication() Application {
 	return Application{
 		settings: nil,
+		server:   nil,
 	}
 }
 
@@ -22,5 +26,7 @@ func (a *Application) Run() error {
 		return err
 	}
 
-	return nil
+	a.server = srv.NewServer(a.settings.port)
+
+	return a.server.Start()
 }
