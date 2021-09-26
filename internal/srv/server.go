@@ -23,6 +23,11 @@ func NewServer(port int) *Server {
 	}
 }
 
+// RegisterService registers new HTTP service
+func (s *Server) RegisterService(service Service) {
+	service.Register(s.router)
+}
+
 // Start starts the port listening
 func (s *Server) Start() error {
 	s.router.Handle("/", http.FileServer(http.Dir("static")))

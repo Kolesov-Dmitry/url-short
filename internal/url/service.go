@@ -16,9 +16,10 @@ func NewService() *Service {
 }
 
 func (s *Service) shortenPostHandler(rw http.ResponseWriter, r *http.Request) {
-
+	rw.Header().Set("Content-Type", "text/pain")
+	rw.Write([]byte("Answer"))
 }
 
 func (s *Service) Register(router *mux.Router) {
-	router.HandleFunc("api/v1/shorten", s.shortenPostHandler).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/shorten", s.shortenPostHandler).Methods(http.MethodPost)
 }
