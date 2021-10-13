@@ -7,7 +7,8 @@ import (
 
 // Errors
 var (
-	ErrorUrlAlreadyExists = errors.New("URL is aslready exists")
+	ErrorUrlAlreadyExists = errors.New("URL is already exists")
+	ErrorUrlNotFound      = errors.New("URL was not found")
 )
 
 // Urls is an urls repository
@@ -52,4 +53,23 @@ func (u *Urls) AppendUrl(ctx context.Context, url string) (UrlHash, error) {
 	}
 
 	return urlHash, nil
+}
+
+// FetchUrlByHash fetches URL from the repository by given URL hash
+// Inputs:
+//   ctx  - context
+//   hash - URL hash
+// Output:
+//   Returns found URL if succeeded, otherwise returns error
+func (u *Urls) FetchUrlByHash(ctx context.Context, hash UrlHash) (string, error) {
+	url, err := u.urlStore.Read(ctx, hash)
+	if err != nil {
+		return "", err
+	}
+
+	if url == nil {
+		return "", ErrorUrlNotFound
+	}
+
+	return url.URL, nil
 }
