@@ -1,6 +1,7 @@
 package app
 
 import (
+	"url-short/internal/repos/urls"
 	"url-short/internal/srv"
 	"url-short/internal/url"
 )
@@ -10,6 +11,8 @@ type Application struct {
 	settings       *settings
 	server         *srv.Server
 	shortenService *url.ShortenService
+	urlStore       *urls.UrlStore
+	linkingStore   *urls.LinkingStore
 }
 
 // NewApplication creates new Application instance
@@ -19,6 +22,8 @@ func NewApplication() Application {
 		settings:       nil,
 		server:         nil,
 		shortenService: nil,
+		urlStore:       nil,
+		linkingStore:   nil,
 	}
 }
 
@@ -31,6 +36,8 @@ func (a *Application) Run() error {
 		return err
 	}
 
+	// TODO: create UrlStore and LinkingStore
+
 	a.server = srv.NewServer(a.settings.port)
 	a.registerServices()
 
@@ -39,6 +46,6 @@ func (a *Application) Run() error {
 
 // registerServices
 func (a *Application) registerServices() {
-	a.shortenService = url.NewService()
+	a.shortenService = url.NewService(*a.urlStore, *a.linkingStore)
 	a.server.RegisterService(a.shortenService)
 }
