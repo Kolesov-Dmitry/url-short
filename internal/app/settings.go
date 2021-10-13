@@ -14,7 +14,8 @@ const (
 
 // settings holds the application main settings
 type settings struct {
-	port int `env:"PORT"`
+	port  int    `env:"PORT"`
+	dbURL string `env:"DATABASE_URL"`
 }
 
 // loadSettings loads application main settings
@@ -32,14 +33,16 @@ func loadSettings() (*settings, error) {
 	}
 
 	s.port = viper.GetInt("port")
+	s.dbURL = viper.GetString("database_url")
 
 	// check if all parametres are set
-	if err := s.forAll(func(tag string, isZero bool) error {
+	err := s.forAll(func(tag string, isZero bool) error {
 		if isZero {
 			return fmt.Errorf("environment value `%s_%s` should be set", settingsPrefix, tag)
 		}
 		return nil
-	}); err != nil {
+	})
+	if err != nil {
 		return nil, err
 	}
 

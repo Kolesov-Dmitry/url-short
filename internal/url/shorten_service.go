@@ -41,7 +41,7 @@ func (s *ShortenService) shortenPostHandler(rw http.ResponseWriter, r *http.Requ
 	}
 
 	urlHash, err := s.urlsRepo.AppendUrl(r.Context(), holder.Url)
-	if errors.Is(err, urls.ErrorUrlAlreadyExists) {
+	if errors.Is(err, urls.ErrUrlAlreadyExists) {
 		http.Error(rw, err.Error(), http.StatusConflict)
 		return
 	}

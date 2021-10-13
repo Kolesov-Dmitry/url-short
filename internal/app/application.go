@@ -1,6 +1,8 @@
 package app
 
 import (
+	"log"
+	"url-short/internal/db"
 	"url-short/internal/repos/urls"
 	"url-short/internal/srv"
 	"url-short/internal/url"
@@ -11,8 +13,8 @@ type Application struct {
 	settings       *settings
 	server         *srv.Server
 	shortenService *url.ShortenService
-	urlStore       *urls.UrlStore
-	linkingStore   *urls.LinkingStore
+	urlStore       urls.UrlStore
+	linkingStore   urls.LinkingStore
 }
 
 // NewApplication creates new Application instance
@@ -36,16 +38,23 @@ func (a *Application) Run() error {
 		return err
 	}
 
-	// TODO: create UrlStore and LinkingStore
+	// TODO: create LinkingStore
+	urlStore := db.NewUrlStorePg()
+	if err := urlStore.Connect(a.settings.dbURL); err != nil {
+		return err
+	}
+	a.urlStore = urlStore
 
 	a.server = srv.NewServer(a.settings.port)
 	a.registerServices()
+
+	log.Println("Server is started")
 
 	return a.server.Start()
 }
 
 // registerServices
 func (a *Application) registerServices() {
-	a.shortenService = url.NewService(*a.urlStore, *a.linkingStore)
+	a.shortenService = url.NewService(a.urlStore, a.linkingStore)
 	a.server.RegisterService(a.shortenService)
 }
