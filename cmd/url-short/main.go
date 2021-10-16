@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os"
+	"os/signal"
+	"time"
 	"url-short/internal/app"
 )
 
@@ -11,4 +15,14 @@ func main() {
 	if err := a.Run(); err != nil {
 		log.Fatal(err)
 	}
+
+	// Handle ctrl+c
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	<-ctx.Done()
+	cancel()
+
+	// Shutdown server
+	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
+	a.Close(ctx)
+	cancel()
 }

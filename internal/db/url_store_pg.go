@@ -45,6 +45,11 @@ func (s *UrlStorePg) Create(ctx context.Context, u *urls.Url) error {
 	return err
 }
 
+// Close shuts down database connection
+func (s *UrlStorePg) Close() {
+	s.conn.Close()
+}
+
 // Read fetches URL from the database by given URL hash
 // Inputs:
 //   ctx - operation context
