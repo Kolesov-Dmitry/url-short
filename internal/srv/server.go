@@ -45,5 +45,5 @@ func (s *Server) Start() error {
 
 // Close gracefully shuts down http server
 func (s *Server) Close(ctx context.Context) {
-	s.server.Shutdown(ctx)
+	_ = s.server.Shutdown(ctx)
 }

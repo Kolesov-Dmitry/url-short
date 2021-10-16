@@ -66,7 +66,9 @@ func (s *ShortenService) shortenPostHandler(rw http.ResponseWriter, r *http.Requ
 
 	rw.WriteHeader(http.StatusCreated)
 	rw.Header().Set("Content-Type", "application/json")
-	rw.Write([]byte(data))
+	if _, err := rw.Write([]byte(data)); err != nil {
+		log.Println(err)
+	}
 }
 
 // Register registers service handlers
