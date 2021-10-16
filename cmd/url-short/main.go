@@ -1,8 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os"
+	"os/signal"
+	"time"
 	"url-short/internal/app"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 // go build -o bin\url-short.exe cmd\url-short\main.go
@@ -11,4 +17,14 @@ func main() {
 	if err := a.Run(); err != nil {
 		log.Fatal(err)
 	}
+
+	// Handle ctrl+c
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	<-ctx.Done()
+	cancel()
+
+	// Shutdown server
+	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Second)
+	a.Close(ctx)
+	cancel()
 }

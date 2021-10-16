@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"log"
 	"url-short/internal/db"
 	"url-short/internal/repos/urls"
@@ -13,7 +14,7 @@ type Application struct {
 	settings       *settings
 	server         *srv.Server
 	shortenService *url.ShortenService
-	urlStore       urls.UrlStore
+	urlStore       *db.UrlStorePg
 	linkingStore   urls.LinkingStore
 }
 
@@ -39,18 +40,29 @@ func (a *Application) Run() error {
 	}
 
 	// TODO: create LinkingStore
-	urlStore := db.NewUrlStorePg()
-	if err := urlStore.Connect(a.settings.dbURL); err != nil {
+	a.urlStore = db.NewUrlStorePg()
+	if err := a.urlStore.Connect(a.settings.dbURL); err != nil {
 		return err
 	}
-	a.urlStore = urlStore
 
 	a.server = srv.NewServer(a.settings.port)
 	a.registerServices()
 
 	log.Println("Server is started")
 
-	return a.server.Start()
+	go func(server *srv.Server) {
+		if err := server.Start(); err != nil {
+			log.Fatal(err)
+		}
+	}(a.server)
+
+	return nil
+}
+
+// Close gracefully shuts down HTTP server and database connections
+func (a *Application) Close(ctx context.Context) {
+	a.server.Close(ctx)
+	a.urlStore.Close()
 }
 
 // registerServices
