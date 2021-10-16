@@ -2,22 +2,19 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"url-short/internal/repos/urls"
-
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 // UrlStorePg is an UrlStore implementation above PostgreSql
 type UrlStorePg struct {
-	conn *pgxpool.Pool
+	conn *sql.DB
 }
 
 // NewUrlStorePg creates new UrlStorePg instance
 func NewUrlStorePg() *UrlStorePg {
 	return &UrlStorePg{
-
 		conn: nil,
 	}
 }
@@ -29,7 +26,7 @@ func NewUrlStorePg() *UrlStorePg {
 //   Returns error if failed
 func (s *UrlStorePg) Connect(dbUrl string) error {
 	var err error
-	s.conn, err = pgxpool.Connect(context.Background(), dbUrl)
+	s.conn, err = sql.Open("pgx", dbUrl)
 
 	return err
 }
@@ -41,7 +38,7 @@ func (s *UrlStorePg) Connect(dbUrl string) error {
 // Output:
 //   Returns error if failed
 func (s *UrlStorePg) Create(ctx context.Context, u *urls.Url) error {
-	_, err := s.conn.Exec(ctx, "INSERT INTO urls (url_hash, url) VALUES ($1, $2)", string(u.Hash), u.URL)
+	_, err := s.conn.ExecContext(ctx, "INSERT INTO urls (url_hash, url) VALUES ($1, $2)", string(u.Hash), u.URL)
 	return err
 }
 
@@ -59,8 +56,8 @@ func (s *UrlStorePg) Close() {
 func (s *UrlStorePg) Read(ctx context.Context, hash urls.UrlHash) (*urls.Url, error) {
 	var url string
 
-	err := s.conn.QueryRow(ctx, "SELECT url FROM urls WHERE url_hash=$1", string(hash)).Scan(&url)
-	if errors.Is(err, pgx.ErrNoRows) {
+	err := s.conn.QueryRowContext(ctx, "SELECT url FROM urls WHERE url_hash=$1", string(hash)).Scan(&url)
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 

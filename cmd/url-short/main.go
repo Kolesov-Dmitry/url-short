@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"time"
 	"url-short/internal/app"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 // go build -o bin\url-short.exe cmd\url-short\main.go
