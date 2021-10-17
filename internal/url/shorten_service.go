@@ -1,10 +1,12 @@
 package url
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
+	"time"
 	"url-short/internal/repos/urls"
 
 	"github.com/gorilla/mux"
@@ -90,6 +92,15 @@ func (s *ShortenService) expandUrlGetHandler(rw http.ResponseWriter, r *http.Req
 		log.Println(err)
 		return
 	}
+
+	// save statistics
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		if err := s.urlsRepo.SaveUrlLinking(ctx, urls.UrlHash(urlHash)); err != nil {
+			log.Println(err)
+		}
+		cancel()
+	}()
 
 	rw.Header().Set("Location", url)
 	rw.WriteHeader(http.StatusTemporaryRedirect)
