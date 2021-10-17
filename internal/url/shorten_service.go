@@ -71,9 +71,34 @@ func (s *ShortenService) shortenPostHandler(rw http.ResponseWriter, r *http.Requ
 	}
 }
 
+// expandUrlGetHandler '/{urlHash:[0-9]+}' GET request handler
+func (s *ShortenService) expandUrlGetHandler(rw http.ResponseWriter, r *http.Request) {
+	urlHash, ok := mux.Vars(r)["urlHash"]
+	if !ok {
+		http.Error(rw, "Wrong URL", http.StatusBadRequest)
+		return
+	}
+
+	url, err := s.urlsRepo.FetchUrlByHash(r.Context(), urls.UrlHash(urlHash))
+	if errors.Is(err, urls.ErrUrlNotFound) {
+		http.Error(rw, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	if err != nil {
+		http.Error(rw, "Oops...", http.StatusInternalServerError)
+		log.Println(err)
+		return
+	}
+
+	rw.Header().Set("Location", url)
+	rw.WriteHeader(http.StatusTemporaryRedirect)
+}
+
 // Register registers service handlers
 // Inputs:
 //   router - HTTP mux router
 func (s *ShortenService) Register(router *mux.Router) {
 	router.HandleFunc("/api/v1/shorten", s.shortenPostHandler).Methods(http.MethodPost)
+	router.HandleFunc("/{urlHash:[0-9]+}", s.expandUrlGetHandler).Methods(http.MethodGet)
 }
