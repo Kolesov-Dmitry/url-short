@@ -73,3 +73,13 @@ func (u *Urls) FetchUrlByHash(ctx context.Context, hash UrlHash) (string, error)
 
 	return url.URL, nil
 }
+
+// SaveUrlLinking saves URL linking statistics
+// Inputs:
+//   ctx  - context
+//   hash - URL hash
+// Output:
+//   Returns error if failed
+func (u *Urls) SaveUrlLinking(ctx context.Context, hash UrlHash) error {
+	return u.linkingStore.Create(ctx, hash)
+}
