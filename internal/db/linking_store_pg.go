@@ -15,14 +15,14 @@ const (
 	dateTimeFormat = "2006-01-02 15:04:05"
 )
 
-// UrlLinkingPg is an UrlLinking implementation above PostgreSql
-type UrlLinkingPg struct {
+// LinkingStorePg is an UrlLinking implementation above PostgreSql
+type LinkingStorePg struct {
 	conn *sql.DB
 }
 
-// NewUrlLinkingPg creates new UrlLinkingPg instance
-func NewUrlLinkingPg() *UrlLinkingPg {
-	return &UrlLinkingPg{
+// NewLinkingStorePg creates new LinkingStorePg instance
+func NewLinkingStorePg() *LinkingStorePg {
+	return &LinkingStorePg{
 		conn: nil,
 	}
 }
@@ -32,7 +32,7 @@ func NewUrlLinkingPg() *UrlLinkingPg {
 //   dbUrl - database connection URL
 // Output:
 //   Returns error if failed
-func (s *UrlLinkingPg) Connect(dbUrl string) error {
+func (s *LinkingStorePg) Connect(dbUrl string) error {
 	var err error
 	s.conn, err = sql.Open("pgx", dbUrl)
 
@@ -45,7 +45,7 @@ func (s *UrlLinkingPg) Connect(dbUrl string) error {
 //   u - URL to write to the database
 // Output:
 //   Returns error if failed
-func (s *UrlLinkingPg) Create(ctx context.Context, urlHash urls.UrlHash) error {
+func (s *LinkingStorePg) Create(ctx context.Context, urlHash urls.UrlHash) error {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (s *UrlLinkingPg) Create(ctx context.Context, urlHash urls.UrlHash) error {
 }
 
 // Close shuts down database connection
-func (s *UrlLinkingPg) Close() {
+func (s *LinkingStorePg) Close() {
 	s.conn.Close()
 }
 
@@ -66,7 +66,7 @@ func (s *UrlLinkingPg) Close() {
 //   hash - URL hash
 // Output:
 //   Returns found URL linkings if succeeded, otherwise returns error
-func (s *UrlLinkingPg) Read(ctx context.Context, hash urls.UrlHash) chan string {
+func (s *LinkingStorePg) Read(ctx context.Context, hash urls.UrlHash) chan string {
 	outChan := make(chan string, 100)
 
 	go func() {

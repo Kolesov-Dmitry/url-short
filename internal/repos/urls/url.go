@@ -26,7 +26,7 @@ type UrlStore interface {
 // LinkingStore is an abstraction above url linkings storage
 type LinkingStore interface {
 	Create(ctx context.Context, hash UrlHash) error
-	Read(ctx context.Context, hash UrlHash) (*UrlLinking, error)
+	Read(ctx context.Context, hash UrlHash) chan string
 }
 
 /*
