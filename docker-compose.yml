@@ -1,0 +1,23 @@
+version: "3.0"
+
+networks:
+  url-short-network:
+
+services:
+
+  url-short:
+    build: ./
+    ports:
+      - 8000:8000
+    depends_on:
+      - database
+    networks:
+      - url-short-network
+
+  database:
+    restart: always
+    build: ./deploy/postgres
+    ports:
+      - 5433:5432
+    networks:
+      - url-short-network
