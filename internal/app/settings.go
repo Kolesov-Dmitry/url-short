@@ -14,8 +14,10 @@ const (
 
 // settings holds the application main settings
 type settings struct {
-	port  int    `env:"PORT"`
-	dbURL string `env:"DATABASE_URL"`
+	port          int    `env:"PORT"`
+	dbURL         string `env:"DATABASE_URL"`
+	redisAddr     string `env:"REDIS_ADDR"`
+	redisPassword string `env:"REDIS_PASSWORD"`
 }
 
 // loadSettings loads application main settings
@@ -34,6 +36,8 @@ func loadSettings() (*settings, error) {
 
 	s.port = viper.GetInt("port")
 	s.dbURL = viper.GetString("database_url")
+	s.redisAddr = viper.GetString("redis_addr")
+	s.redisPassword = viper.GetString("redis_password")
 
 	// check if all parametres are set
 	err := s.forAll(func(tag string, isZero bool) error {

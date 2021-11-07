@@ -38,7 +38,7 @@ func (s *UrlStorePg) Connect(dbUrl string) error {
 // Output:
 //   Returns error if failed
 func (s *UrlStorePg) Create(ctx context.Context, u *urls.Url) error {
-	_, err := s.conn.ExecContext(ctx, "INSERT INTO urls (url_hash, url) VALUES ($1, $2)", string(u.Hash), u.URL)
+	_, err := s.conn.ExecContext(ctx, "INSERT INTO urls.urls (url_hash, url) VALUES ($1, $2)", string(u.Hash), u.URL)
 	return err
 }
 
@@ -56,7 +56,7 @@ func (s *UrlStorePg) Close() {
 func (s *UrlStorePg) Read(ctx context.Context, hash urls.UrlHash) (*urls.Url, error) {
 	var url string
 
-	err := s.conn.QueryRowContext(ctx, "SELECT url FROM urls WHERE url_hash=$1", string(hash)).Scan(&url)
+	err := s.conn.QueryRowContext(ctx, "SELECT url FROM urls.urls WHERE url_hash=$1", string(hash)).Scan(&url)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

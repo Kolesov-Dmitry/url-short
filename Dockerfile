@@ -18,7 +18,7 @@ FROM alpine:3.9
 COPY --from=builder /go/src/url-short/bin /app/url-short
 
 ENV URL_SHORT_PORT="8000"
-ENV URL_SHORT_DATABASE_URL="postgres://backend:qwer1234@localhost:5433/url_db"
+ENV URL_SHORT_REDIS_PASSWORD="zxcv1234"
 
 EXPOSE 8000
 

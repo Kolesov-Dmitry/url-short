@@ -51,7 +51,7 @@ func (s *LinkingStorePg) Create(ctx context.Context, urlHash urls.UrlHash) error
 		return err
 	}
 
-	_, err = s.conn.ExecContext(ctx, "INSERT INTO urls_linking (id, url_hash) VALUES ($1, $2)", id, string(urlHash))
+	_, err = s.conn.ExecContext(ctx, "INSERT INTO urls.urls_linking (id, url_hash) VALUES ($1, $2)", id, string(urlHash))
 	return err
 }
 
@@ -72,7 +72,7 @@ func (s *LinkingStorePg) Read(ctx context.Context, hash urls.UrlHash) chan strin
 	go func() {
 		defer close(outChan)
 
-		rows, err := s.conn.QueryContext(ctx, "SELECT visited_at FROM urls_linking WHERE url_hash=$1", string(hash))
+		rows, err := s.conn.QueryContext(ctx, "SELECT visited_at FROM urls.urls_linking WHERE url_hash=$1", string(hash))
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Println(err)
 			return

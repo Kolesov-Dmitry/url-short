@@ -4,7 +4,7 @@ CREATE DATABASE url_db;
 
 -- creates user
 CREATE USER backend WITH PASSWORD 'qwer1234';
-GRANT CONNECT ON DATABASE blog TO backend;
+GRANT CONNECT ON DATABASE url_db TO backend;
 
 -- create schema for urls tables
 CREATE SCHEMA urls;
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS urls.urls (
 CREATE TABLE IF NOT EXISTS urls.urls_linking (
 	"id" UUID NOT NULL,
 	"url_hash" VARCHAR(10) NOT NULL,
-	"visited_at" TIMESTAMP NOT NULL DEFAULT 'CURRENT_TIMESTAMP',
+	"visited_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY ("id"),
 	CONSTRAINT "FK_urls_linking_urls" FOREIGN KEY ("url_hash") REFERENCES urls.urls ("url_hash") ON UPDATE NO ACTION ON DELETE CASCADE
 );
