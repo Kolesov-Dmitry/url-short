@@ -7,8 +7,7 @@ import (
 
 // Errors
 var (
-	ErrUrlAlreadyExists = errors.New("URL is already exists")
-	ErrUrlNotFound      = errors.New("URL was not found")
+	ErrUrlNotFound = errors.New("URL was not found")
 )
 
 // Urls is an urls repository
@@ -44,7 +43,7 @@ func (u *Urls) AppendUrl(ctx context.Context, url string) (UrlHash, error) {
 	}
 
 	if surl != nil {
-		return EmptyUrlHash, ErrUrlAlreadyExists
+		return surl.Hash, nil
 	}
 
 	// append URL into repository
