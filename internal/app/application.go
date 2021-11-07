@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"url-short/internal/db"
-	"url-short/internal/repos/urls"
 	"url-short/internal/srv"
 	"url-short/internal/url"
 )
@@ -15,7 +14,8 @@ type Application struct {
 	server         *srv.Server
 	shortenService *url.ShortenService
 	urlStore       *db.UrlStorePg
-	linkingStore   urls.LinkingStore
+	urlCache       *db.UrlCacheRedis
+	linkingStore   *db.LinkingStorePg
 }
 
 // NewApplication creates new Application instance
@@ -26,6 +26,7 @@ func NewApplication() Application {
 		server:         nil,
 		shortenService: nil,
 		urlStore:       nil,
+		urlCache:       nil,
 		linkingStore:   nil,
 	}
 }
@@ -39,12 +40,22 @@ func (a *Application) Run() error {
 		return err
 	}
 
-	// TODO: create LinkingStore
+	// Creating UrlStore
 	a.urlStore = db.NewUrlStorePg()
 	if err := a.urlStore.Connect(a.settings.dbURL); err != nil {
 		return err
 	}
 
+	// Creating LinkingStore
+	a.linkingStore = db.NewLinkingStorePg()
+	if err := a.linkingStore.Connect(a.settings.dbURL); err != nil {
+		return err
+	}
+
+	// Creating UrlCache
+	a.urlCache = db.NewUrlCacheRedis(a.urlStore, a.settings.redisAddr, a.settings.redisPassword)
+
+	// Creating HTTP server
 	a.server = srv.NewServer(a.settings.port)
 	a.registerServices()
 
@@ -62,11 +73,13 @@ func (a *Application) Run() error {
 // Close gracefully shuts down HTTP server and database connections
 func (a *Application) Close(ctx context.Context) {
 	a.server.Close(ctx)
+	a.urlCache.Close()
 	a.urlStore.Close()
+	a.linkingStore.Close()
 }
 
 // registerServices
 func (a *Application) registerServices() {
-	a.shortenService = url.NewService(a.urlStore, a.linkingStore)
+	a.shortenService = url.NewService(a.urlCache, a.linkingStore)
 	a.server.RegisterService(a.shortenService)
 }
