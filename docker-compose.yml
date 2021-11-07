@@ -1,0 +1,37 @@
+version: "3.0"
+
+networks:
+  url-short-network:
+
+services:
+
+  url-short:
+    build: ./
+    ports:
+      - 8000:8000
+    environment:
+      URL_SHORT_DATABASE_URL: "postgres://backend:qwer1234@database:5432/url_db?sslmode=disable"
+      URL_SHORT_REDIS_ADDR: "cache:6379"
+    depends_on:
+      - database
+      - cache
+    networks:
+      - url-short-network
+
+  database:
+    restart: always
+    container_name: database
+    build: ./deploy/postgres
+    ports:
+      - 5432:5432
+    networks:
+      - url-short-network
+
+  cache:
+    restart: always
+    container_name: cache
+    build: ./deploy/redis
+    ports:
+      - 6379:6379
+    networks:
+      - url-short-network

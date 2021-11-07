@@ -14,6 +14,7 @@ type Application struct {
 	server         *srv.Server
 	shortenService *url.ShortenService
 	urlStore       *db.UrlStorePg
+	urlCache       *db.UrlCacheRedis
 	linkingStore   *db.LinkingStorePg
 }
 
@@ -25,6 +26,7 @@ func NewApplication() Application {
 		server:         nil,
 		shortenService: nil,
 		urlStore:       nil,
+		urlCache:       nil,
 		linkingStore:   nil,
 	}
 }
@@ -50,6 +52,9 @@ func (a *Application) Run() error {
 		return err
 	}
 
+	// Creating UrlCache
+	a.urlCache = db.NewUrlCacheRedis(a.urlStore, a.settings.redisAddr, a.settings.redisPassword)
+
 	// Creating HTTP server
 	a.server = srv.NewServer(a.settings.port)
 	a.registerServices()
@@ -68,12 +73,13 @@ func (a *Application) Run() error {
 // Close gracefully shuts down HTTP server and database connections
 func (a *Application) Close(ctx context.Context) {
 	a.server.Close(ctx)
+	a.urlCache.Close()
 	a.urlStore.Close()
 	a.linkingStore.Close()
 }
 
 // registerServices
 func (a *Application) registerServices() {
-	a.shortenService = url.NewService(a.urlStore, a.linkingStore)
+	a.shortenService = url.NewService(a.urlCache, a.linkingStore)
 	a.server.RegisterService(a.shortenService)
 }
